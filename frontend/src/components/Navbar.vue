@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
@@ -51,6 +51,11 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const searchQuery = ref(route.query.search || '')
+
+// URL 中的关键词变化（标签筛选后重新搜索、前进后退、概览中清除关键词）时同步输入框
+watch(() => route.query.search, (search) => {
+  searchQuery.value = search || ''
+})
 
 function goHome() {
   router.push('/')
@@ -70,17 +75,25 @@ function handleLogout() {
   router.push('/')
 }
 
+// 更新关键词属于条件变化：保留当前标签，同时回到第一页
 function handleSearch() {
-  const query = searchQuery.value.trim()
-  if (query) {
-    router.push({ path: '/', query: { search: query } })
-  }
+  applySearch(searchQuery.value.trim())
 }
 
 function handleClear() {
-  if (route.path === '/' && route.query.search) {
-    router.push({ path: '/', query: {} })
+  searchQuery.value = ''
+  applySearch('')
+}
+
+function applySearch(keyword) {
+  const query = {}
+  if (keyword) {
+    query.search = keyword
   }
+  if (route.query.tag) {
+    query.tag = route.query.tag
+  }
+  router.push({ path: '/', query })
 }
 </script>
 

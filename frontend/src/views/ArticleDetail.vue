@@ -78,7 +78,13 @@ async function fetchArticle() {
 }
 
 function goBack() {
-  router.push('/')
+  // 优先返回上一页，保留列表的关键词 / 标签 / 页码状态；
+  // 直接打开详情页（无历史）时回退到文章列表首页
+  if (window.history.state?.back) {
+    router.back()
+  } else {
+    router.push('/')
+  }
 }
 
 function formatDate(dateStr) {
