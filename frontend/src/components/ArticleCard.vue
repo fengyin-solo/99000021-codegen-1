@@ -1,5 +1,25 @@
 <template>
-  <el-card class="article-card" shadow="hover" @click="goToArticle">
+  <div v-if="compact" class="article-row" @click="goToArticle">
+    <div class="row-main">
+      <h3 class="row-title" v-html="highlightText(article.title)"></h3>
+      <p class="row-summary" v-html="highlightText(article.summary)"></p>
+    </div>
+    <div class="row-side">
+      <div class="row-tags">
+        <el-tag
+          v-for="tag in article.tags"
+          :key="tag"
+          size="small"
+          @click.stop="filterByTag(tag)"
+        >
+          {{ tag }}
+        </el-tag>
+      </div>
+      <span class="row-date">{{ formatDate(article.created_at) }}</span>
+    </div>
+  </div>
+
+  <el-card v-else class="article-card" shadow="hover" @click="goToArticle">
     <template #header>
       <div class="card-header">
         <h3 class="article-title" v-html="highlightText(article.title)"></h3>
@@ -31,6 +51,10 @@ const props = defineProps({
   highlightQuery: {
     type: String,
     default: ''
+  },
+  compact: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -108,6 +132,72 @@ function highlightText(text) {
 
 .article-tags .el-tag {
   cursor: pointer;
+}
+
+.article-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 14px 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+}
+
+.article-row:hover {
+  background-color: #f5f7fa;
+}
+
+.row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row-title {
+  font-size: 16px;
+  color: #303133;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-summary {
+  color: #909399;
+  font-size: 13px;
+  margin: 4px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.row-tags .el-tag {
+  cursor: pointer;
+}
+
+.row-date {
+  color: #c0c4cc;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 :deep(.highlight) {

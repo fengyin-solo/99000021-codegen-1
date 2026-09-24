@@ -78,7 +78,12 @@ async function fetchArticle() {
 }
 
 function goBack() {
-  router.push('/')
+  // 从列表进入时返回原列表状态（关键词/标签/页码/视图），否则回到首页
+  if (window.history.state?.back) {
+    router.back()
+  } else {
+    router.push('/')
+  }
 }
 
 function formatDate(dateStr) {

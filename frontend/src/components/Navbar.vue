@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { ElMessage } from 'element-plus'
@@ -51,6 +51,11 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const searchQuery = ref(route.query.search || '')
+
+// 概览/列表状态以路由为准，返回或前进时同步搜索框
+watch(() => route.query.search, (value) => {
+  searchQuery.value = value || ''
+})
 
 function goHome() {
   router.push('/')
@@ -71,15 +76,24 @@ function handleLogout() {
 }
 
 function handleSearch() {
-  const query = searchQuery.value.trim()
-  if (query) {
-    router.push({ path: '/', query: { search: query } })
+  // 保留当前标签等条件；关键词变化后回到第一页
+  const query = { ...route.query }
+  delete query.page
+  const keyword = searchQuery.value.trim()
+  if (keyword) {
+    query.search = keyword
+  } else {
+    delete query.search
   }
+  router.push({ path: '/', query }).catch(() => {})
 }
 
 function handleClear() {
   if (route.path === '/' && route.query.search) {
-    router.push({ path: '/', query: {} })
+    const query = { ...route.query }
+    delete query.search
+    delete query.page
+    router.push({ path: '/', query }).catch(() => {})
   }
 }
 </script>
